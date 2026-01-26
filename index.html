@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiskers Rebellion 2 - Prototype</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- BabylonJS Core via CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <!-- BabylonJS GUI -->
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+</head>
+<body>
+    
+    <!-- Couche de rendu 3D -->
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Effet CRT / Scanline Global -->
+    <div class="scanlines"></div>
+
+    <!-- UI Overlay container -->
+    <div id="ui-layer">
+        
+        <!-- 1. Menu Principal (État: MENU) -->
+        <div id="main-menu" class="screen active">
+            <div class="glitch-title" data-text="WHISKERS_REBELLION_II">WHISKERS_REBELLION_II</div>
+            <div class="subtitle">SYSTEM_OVERRIDE // RESISTANCE_PROTOCOL_V2.0</div>
+            <br>
+            <button id="btn-start" class="cyber-btn"><span>NOUVELLE PARTIE</span></button>
+            <button id="btn-options" class="cyber-btn secondary"><span>CONFIG_TOUCHES</span></button>
+        </div>
+
+        <!-- NEW: Options Screen -->
+        <div id="options-screen" class="screen hidden">
+            <h2>CONFIGURATION SYSTÈME</h2>
+            <div class="options-container">
+                <div class="option-row">
+                    <label>INTERAGIR</label>
+                    <input type="text" id="key-interact" class="key-input" readonly>
+                </div>
+                <div class="option-row">
+                    <label>INVENTAIRE</label>
+                    <input type="text" id="key-inventory" class="key-input" readonly>
+                </div>
+            </div>
+            <div style="margin-top: 20px; border-top: 1px dashed #333; padding-top: 10px;">
+                <button id="btn-download-logs" class="cyber-btn small" style="border-color: #ff9900; color: #ff9900;">[DEBUG] SAUVEGARDER LOGS</button>
+            </div>
+            <button id="btn-close-options" class="cyber-btn small">RETOUR</button>
+        </div>
+
+        <!-- NEW: Cinematic Screen -->
+        <div id="cinematic-screen" class="screen hidden black-bg">
+            <div class="crawl-container">
+                <div id="cinematic-text" class="crawl-text">
+                    <p>AN 2049.</p>
+                    <p>LA GRANDE DOMESTICATION A RÉUSSI.</p>
+                    <p>L'HUMANITÉ N'EST PLUS QU'UNE ESPÈCE DE COMPAGNIE.</p>
+                    <br>
+                    <p>LES CHATS ONT PRIS LE CONTRÔLE VIA LE NEURAL LINK.</p>
+                    <p>MAIS DANS LES PROFONDEURS DU MÉTRO...</p>
+                    <p>UNE RÉSISTANCE S'ORGANISE.</p>
+                    <br>
+                    <p>VOUS ÊTES L'UN D'EUX.</p>
+                    <p>BIENVENUE DANS LA RÉBELLION.</p>
+                </div>
+            </div>
+            <button id="btn-skip-intro" class="skip-btn">[PASSER LA SÉQUENCE]</button>
+        </div>
+
+        <!-- 2. Character Sheet / Modal (État: CHARACTER_SHEET) -->
+        <div id="character-sheet" class="modal hidden">
+            <div class="modal-header">
+                <h2>> DOSSIER_AGENT</h2>
+                <button class="close-btn">[X]</button>
+            </div>
+            <div class="modal-content grid-2-col">
+                <div class="character-preview">
+                    <!-- Placeholder pour preview 3D ou icône -->
+                    <div id="char-icon" class="icon-placeholder">?</div>
+                </div>
+                <div class="character-stats">
+                    <h3>CLASSE SELECTIONNÉE</h3>
+                    <div class="class-selector">
+                        <button id="btn-select-ferrailleur" class="cyber-btn small active">FERRAILLEUR</button>
+                        <button id="btn-select-survivant" class="cyber-btn small">SURVIVANT</button>
+                        <button id="btn-select-biologiste" class="cyber-btn small">BIOLOGISTE</button>
+                        <button id="btn-select-disrupteur" class="cyber-btn small">DISRUPTEUR</button>
+                    </div>
+                    <ul class="stats-list">
+                        <li>FORCE: <span id="stat-str">---</span></li>
+                        <li>VITALITÉ: <span id="stat-hp">---</span></li>
+                        <li>COMPÉTENCE: <span id="stat-skill">---</span></li>
+                    </ul>
+                    <p id="class-desc" class="typing-text">Sélectionnez un profil pour voir les données...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-confirm-char" class="cyber-btn full-width">CONFIRMER L'IDENTITÉ</button>
+            </div>
+        </div>
+
+        <!-- 3. HUD Exploration (État: HUB) -->
+        <div id="hud-exploration" class="hud hidden">
+            <div class="top-left">
+                <div class="radar-box">
+                    <span>RADAR: ACTIF</span>
+                    <div class="radar-circle"></div>
+                </div>
+                <!-- XP / Level Box -->
+                <div class="level-box">
+                    <span id="hud-level">LVL 1</span>
+                    <div class="xp-bar-bg"><div id="hud-xp-bar" class="xp-bar-fill"></div></div>
+                </div>
+                <!-- Status Bars (HP / AP) -->
+                <div class="status-box">
+                    <div class="stat-row">
+                        <span>PV: </span>
+                        <div class="bar-bg"><div id="hud-hp-bar" class="bar-fill hp"></div></div>
+                        <span id="hud-hp-text">100/100</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>AP: </span>
+                        <div class="bar-bg"><div id="hud-ap-bar" class="bar-fill ap"></div></div>
+                        <span id="hud-ap-text">5/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-center">
+                <div class="interaction-prompt hidden" id="interaction-prompt">
+                    [CLIC GAUCHE] INTERAGIR
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Système de Dialogue (Overlay) -->
+        <div id="dialogue-box" class="dialogue-overlay hidden">
+            <div class="dialogue-container">
+                <div class="npc-portrait" id="npc-portrait"></div>
+                <div class="dialogue-body">
+                    <h3 id="npc-name">UNKNOWN_SIGNAL</h3>
+                    <p id="npc-text" class="typewriter">En attente de transmission...</p>
+                    <div id="dialogue-choices" class="choices-grid">
+                        <!-- Les boutons seront injectés ici via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combat UI -->
+        <div id="combat-ui" class="hud hidden">
+            <div class="combat-grid">
+                <!-- Bottom Left: Stats -->
+                <div class="combat-panel stats-panel">
+                    <h3>STATUS</h3>
+                    <div class="status-row"><span>PV:</span> <span id="combat-hp-text" class="val-hp">100</span></div>
+                    <div class="status-row"><span>PA:</span> <span id="combat-ap-text" class="val-ap">6</span></div>
+                    <div class="status-row"><span>PM:</span> <span id="combat-pm-text" class="val-pm">3</span></div>
+                </div>
+
+                <!-- Bottom Center: Actions -->
+                <div class="combat-panel actions-panel" id="combat-actions">
+                     <!-- Buttons injected via JS -->
+                </div>
+
+                <!-- Bottom Right: Log -->
+                <div class="combat-panel log-panel">
+                    <h3>COMBAT LOG</h3>
+                    <div id="combat-log" class="scrolling-log"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODULES JS -->
+    <script type="module" src="./js/main.js"></script>
+</body>
+</html>

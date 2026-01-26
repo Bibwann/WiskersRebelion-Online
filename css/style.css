@@ -1,0 +1,727 @@
+/* css/style.css */
+
+/* --- VARIABLES & BASE --- */
+:root {
+    --terminal-bg: #0a0a0a;
+    --terminal-green: #0f0;
+    --terminal-dim: #003300;
+    --terminal-alert: #ff3333;
+    --terminal-accent: #ffb000; /* Amber */
+    --ui-border: 2px solid var(--terminal-green);
+    --font-main: 'Courier New', Courier, monospace;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: var(--font-main);
+    color: var(--terminal-green);
+    user-select: none;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- CRT SCANLINE EFFECT --- */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.2)
+    );
+    background-size: 100% 4px;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.scanlines::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+/* --- UI LAYOUTS --- */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.screen, .modal, .hud, .dialogue-overlay {
+    pointer-events: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.active {
+    display: flex !important;
+}
+
+/* --- MAIN MENU --- */
+#main-menu {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: rgba(0, 5, 0, 0.9);
+}
+
+.glitch-title {
+    font-size: 4rem;
+    font-weight: bold;
+    text-shadow: 2px 2px var(--terminal-alert), -2px -2px blue;
+    animation: glitch 1s infinite alternate;
+    letter-spacing: 5px;
+}
+
+@keyframes glitch {
+    0% { transform: skew(0deg); }
+    20% { transform: skew(-2deg); }
+    40% { transform: skew(2deg); }
+    100% { transform: skew(0deg); }
+}
+
+/* --- BUTTONS --- */
+.cyber-btn {
+    background: black;
+    color: var(--terminal-green);
+    border: 2px solid var(--terminal-green);
+    padding: 15px 30px;
+    margin: 10px;
+    font-family: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.cyber-btn:hover {
+    background: var(--terminal-green);
+    color: black;
+    box-shadow: 0 0 15px var(--terminal-green);
+}
+
+.cyber-btn.secondary {
+    border-color: var(--terminal-dim);
+    color: #88aa88;
+}
+
+.cyber-btn.small {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.cyber-btn.active {
+    background: var(--terminal-green);
+    color: black;
+}
+
+/* --- MODAL (Character Sheet) --- */
+.modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    background: rgba(10, 20, 10, 0.95);
+    border: var(--ui-border);
+    box-shadow: 0 0 20px var(--terminal-dim);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--terminal-green);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--terminal-alert);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    flex: 1;
+}
+
+.character-preview {
+    border: 1px dashed var(--terminal-green);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 20, 0, 0.3);
+}
+
+.icon-placeholder {
+    font-size: 5rem;
+}
+
+.stats-list {
+    list-style: none;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 2rem;
+}
+
+/* --- DIALOGUE SYSTEM --- */
+.dialogue-overlay {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+}
+
+.dialogue-container {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--terminal-accent); /* Amber for dialogues */
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    gap: 20px;
+}
+
+.npc-portrait {
+    width: 150px;
+    height: 100%;
+    background: #222;
+    border: 1px solid var(--terminal-accent);
+}
+
+.dialogue-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialogue-body h3 {
+    margin: 0;
+    color: var(--terminal-accent);
+    background: #221100;
+    display: inline-block;
+    padding: 2px 10px;
+}
+
+.typewriter {
+    color: #fff;
+    font-size: 1.1rem;
+    margin: 10px 0;
+}
+
+.choices-grid {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+/* HUD elements */
+.hud {
+    display: block;
+}
+
+.top-left {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-align: left;
+}
+
+.radar-box {
+    border: 1px solid var(--terminal-green);
+    padding: 10px;
+    background: rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+}
+
+.radar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px dashed var(--terminal-green);
+    margin: 5px auto;
+}
+
+.top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+}
+
+.bottom-center {
+    position: absolute;
+    bottom: 100px;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+}
+
+.interaction-prompt {
+    display: inline-block;
+    background: var(--terminal-accent);
+    color: black;
+    padding: 5px 15px;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* --- Options Screen --- */
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+    width: 300px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.key-input {
+    background: black;
+    color: var(--terminal-green);
+    border: 1px solid var(--terminal-green);
+    padding: 5px;
+    width: 60px;
+    text-align: center;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.key-input:focus {
+    background: var(--terminal-dim);
+    outline: none;
+}
+
+/* --- Level & XP --- */
+.level-box {
+    margin-top: 10px;
+    background: rgba(0,0,0,0.5);
+    padding: 5px;
+    border: 1px solid var(--terminal-green);
+}
+
+.xp-bar-bg {
+    width: 100%;
+    height: 5px;
+    background: #222;
+    margin-top: 2px;
+}
+
+.xp-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--terminal-accent);
+    transition: width 0.3s;
+}
+
+/* --- Cinematic --- */
+.black-bg {
+    background: #000 !important;
+    z-index: 100;
+}
+
+.crawl-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 400px;
+    overflow: hidden;
+}
+
+.crawl-text {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--terminal-green);
+    text-align: center;
+    transform-origin: 50% 100%;
+    animation: crawl 20s linear forwards;
+}
+
+@keyframes crawl {
+    0% {
+        opacity: 0;
+        transform: rotateX(20deg) translateZ(0) translateY(100vh);
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: rotateX(25deg) translateZ(-1000px) translateY(-50vh);
+    }
+}
+
+.skip-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+}
+
+.skip-btn:hover {
+    color: white;
+}
+
+/* Status Bars in HUD */
+.status-box {
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border: 1px solid var(--terminal-green);
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    color: var(--terminal-green);
+}
+
+.stat-row span {
+    width: 30px;
+}
+
+.stat-row #hud-hp-text, .stat-row #hud-ap-text {
+    width: 60px;
+    margin-left: 10px;
+    text-align: right;
+}
+
+.bar-bg {
+    flex-grow: 1;
+    height: 10px;
+    background: #333;
+    border: 1px solid #555;
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.bar-fill.hp {
+    background-color: #ff3333;
+    box-shadow: 0 0 5px #ff0000;
+}
+
+.bar-fill.ap {
+    background-color: #33cc33;
+    box-shadow: 0 0 5px #00ff00;
+}
+
+
+/* COMBAT UI UPDATE */
+.combat-status-panel {
+    position: absolute;
+    bottom: 200px;
+    right: 20px;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--terminal-green);
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    color: var(--terminal-green);
+}
+
+.scrolling-log {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 0.9em;
+    display: flex;
+    flex-direction: column-reverse; /* Newest at bottom visually if we append normally, or we can stay standard */
+}
+
+/* Scrollbar styling */
+.scrolling-log::-webkit-scrollbar {
+    width: 8px;
+}
+.scrolling-log::-webkit-scrollbar-track {
+    background: #000; 
+}
+.scrolling-log::-webkit-scrollbar-thumb {
+    background: var(--terminal-green); 
+}
+
+#combat-actions {
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    width: 250px;
+}
+
+.combat-btn {
+    background: #111;
+    border: 1px solid var(--terminal-green);
+    color: var(--terminal-green);
+    padding: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.combat-btn:hover {
+    background: var(--terminal-green);
+    color: #000;
+}
+
+.combat-btn:disabled {
+    border-color: #555;
+    color: #555;
+    cursor: not-allowed;
+    background: #000;
+}
+
+.combat-btn .cost {
+    float: right;
+    font-size: 0.8em;
+    color: var(--terminal-accent);
+}
+
+
+/* --- NEW COMBAT LAYOUT (GRID) --- */
+.combat-grid {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 200px;
+    display: grid;
+    grid-template-columns: 200px 1fr 300px;
+    gap: 20px;
+    align-items: end;
+}
+
+.combat-panel {
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid var(--terminal-green);
+    padding: 15px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-panel {
+    border-color: #0088ff; /* Blue themed for stats */
+    justify-content: center;
+}
+
+.actions-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    border-color: var(--terminal-accent); /* Amber for actions */
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.log-panel {
+    border-color: #555;
+}
+
+/* Stats Text Coloring */
+.val-hp { color: #ff3333; font-weight: bold; font-size: 1.2em; }
+.val-ap { color: #0088ff; font-weight: bold; font-size: 1.2em; }
+.val-pm { color: #00ff00; font-weight: bold; font-size: 1.2em; }
+
+/* Enhanced Buttons */
+.combat-btn {
+    background: #111;
+    border: 2px solid var(--terminal-green);
+    color: var(--terminal-green);
+    padding: 10px 15px;
+    min-width: 120px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.combat-btn:hover {
+    background: var(--terminal-green);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 #004400;
+}
+
+.combat-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.combat-btn .cost {
+    font-size: 0.75em;
+    margin-top: 5px;
+    color: var(--terminal-accent); /* Amber */
+}
+.combat-btn:hover .cost {
+    color: #440000;
+}
+
+.scrolling-log {
+    flex: 1;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.85em;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+
+/* FORCE VISIBILITY OVERRIDE */
+.combat-grid {
+    height: 250px !important;
+    z-index: 9999 !important;
+    background: rgba(0,0,0,0.5); /* Semi transbg behind gaps */
+}
+
+/* Fix Spell Button Layout for visibility */
+.combat-btn {
+    min-width: 140px;
+    height: 60px;
+    margin: 5px;
+    font-size: 0.9em;
+}
+
+.actions-panel {
+    align-items: flex-start; /* Top align */
+    align-content: flex-start;
+    padding-top: 10px;
+}
+
+
+/* FORCE SPELL PANEL VISIBILITY */
+.actions-panel {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr; /* 2 Columns */
+    grid-auto-rows: min-content;
+    gap: 8px;
+    align-content: start;
+    overflow-y: visible !important; /* Show all */
+}
+
+.combat-btn {
+    width: 100%;
+    min-width: unset;
+    height: auto;
+    min-height: 55px;
+    margin: 0 !important;
+    padding: 8px 4px;
+    font-size: 0.85rem;
+}
+
+/* Make Cancel Button DISTINCT */
+#btn-cancel-action {
+    grid-column: 1 / -1; /* Full width */
+    background: #330000;
+    border-color: red;
+    color: red;
+}
+
+
+/* OBJECTIVE BOX */
+.objective-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-left: 4px solid #f0ad4e;
+    padding: 15px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    width: 250px;
+    pointer-events: none;
+}
+.objective-box h3 {
+    margin: 0 0 5px 0;
+    font-size: 0.9em;
+    color: #f0ad4e;
+    text-transform: uppercase;
+}
+.objective-box p {
+    margin: 0;
+    font-size: 0.85em;
+}
+
+@keyframes flashObj {
+    0% { background-color: rgba(255, 255, 255, 0.5); }
+    100% { background-color: rgba(0, 0, 0, 0.7); }
+}
+.flash-objective {
+    animation: flashObj 0.5s ease-out;
+}
+
