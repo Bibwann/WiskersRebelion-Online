@@ -66,3 +66,13 @@ Toute contribution est la bienvenue ! Contactez les développeurs pour proposer 
 
 ## Licence
 Projet réalisé à des fins éducatives et créatives. Voir les fichiers du projet pour plus d’informations.
+
+## How to run the project
+Once you have the run project on yout machine run the following commands
+
+```shell
+docker build -t whiskers <PATH_TO_PROJECT>   
+```
+```shell
+docker run -it --rm -d -p 8080:80 --name whiskers whiskers
+```
