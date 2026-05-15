@@ -3,7 +3,7 @@
 ## Présentation
 Whiskers Rebellion 2 est un jeu Action-RPG / Dungeon Crawler développé pour le web avec BabylonJS. Plongez dans un univers post-apocalyptique, satirique et dark fantasy où l’humanité est asservie par des chats cybernétiques.
 
-**Développeurs** : Federico , Thomas, Bastien
+**Développeurs** : Federico Mantovani , Thomas Ponsoda, Bastien Nieto
 
 ## Lore Fondamental : La Grande Domestication
 En 2045, le projet Cognito d’Aelurus Dynamics a transformé les chats en créatures hyper-intelligentes, déclenchant la chute de l’humanité lors de la Nuit du Grand Verrouillage. Les humains sont devenus des serviteurs, indispensables pour la motricité fine des félins, qui règnent désormais sur Terre grâce à la technologie et à la cybernétique. Un mystérieux signal lunaire semble contrôler l’ordre félin mondial...
